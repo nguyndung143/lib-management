@@ -5,7 +5,12 @@ validator = function(i){
     if (formelements){
         i.rules.forEach(function(rule){
             // lưu các function rule
-            selectorrules[rule.a] = rule.test;
+            if (Array.isArray(selectorrules[rule.a])){
+                selectorrules[rule.a].push(rule.test);
+            }else{
+                selectorrules[rule.a] = [rule.test];
+            }
+
             var inputelemant = formelements.querySelector(rule.a)
                 if(inputelemant){
                     inputelemant.onblur = function(){
@@ -49,7 +54,8 @@ validator.minlenght = function(a,min){
     return{
         a:a,
         test : function(value){
-         value.length >= min ? undefined : 'nhập nhiều hơn ${min} ký tự'}
+         value.length >= min ? undefined : "nhập nhiều hơn 6 ký tự"
+        }
     };
 }
 validator({
@@ -57,6 +63,7 @@ validator({
     rules : [
         validator.required('#fullname','vui lòng nhập thông tin'),
         validator.isemail('#email'),
-        // validator.minlenght('#fullname',6),
+        validator.minlenght('#password',6),
+        validator.minlenght('#fullname',6),
     ]
 })
