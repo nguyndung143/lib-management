@@ -2,8 +2,13 @@
 validator = function(i){
     
     function validate (inputelemant,rule){
-        var errormessage = rule.test(inputelemant.value)
         var warningmessage = inputelemant.parentElement.querySelector('.form-message')
+        var rules = selectorrules[rule.a];
+        var errormessage;
+        for (var i =0; i < rules.length; ++i ){
+        errormessage = rules[i](inputelemant.value);
+        if (errormessage) break;
+        }
         if(errormessage){
             warningmessage.innerText = errormessage;
             inputelemant.parentElement.classList.add('invalid');
@@ -17,8 +22,8 @@ validator = function(i){
     if (formelements){
         i.rules.forEach(function(rule){
             // lưu các function rule
-            if (Array.isArray(selectorrules[rule.a])){
-                selectorrules[rule.a].push(rule.test);
+            if (Array.isArray(selectorrules[rule.a])){ //rule.a là các key của mảng hay còn gọi là số lượng pt của mảng
+                selectorrules[rule.a].push(rule.test); // dẩy các function tương ướng với key
             }else{
                 selectorrules[rule.a] = [rule.test];
             }
@@ -34,7 +39,7 @@ validator = function(i){
                     inputelemant.parentElement.classList.remove('invalid');
                 }
         })
-        console.log(selectorrules);
+        
     }
 }
 // kiem tra 
@@ -59,23 +64,33 @@ validator.isemail = function(a){
     };
 }
 // kiem tri do dai
-validator.minlenght = function(a,min){
+validator.minlength = function(a,min){
     return{
         a:a,
         test : function(value){
-         value.length >= min ? undefined : 'nhập nhiều hơn {$min} ký tự'
+        return value.length >= min ? undefined : `vui lòng nhập nhiều hơn ${min} ký tự`;
         }
     };
 }
+validator.comfirmed =function(a,getcomfirm,message){
+    return {
+        a:a,
+        test : function(value){
+            return value === getcomfirm() ? undefined : message || `giá trị nhập vào không chính xác`
+        }
+    }
+}    
 validator({
     form:'#form-1',
     rules : [
         validator.required('#fullname','vui lòng nhập thông tin'),
         validator.required('#email','vui lòng nhập thông tin'),
-        validator.required('$password','vui lòng nhập thông tin'),
-        // validator.required('#password'),
+        validator.required('#password','vui lòng nhập thông tin'),
+        validator.required('#password_confirmation','vui lòng nhập thông tin'),
         validator.isemail('#email'),
-        // validator.minlenght('#password',6),
-        // validator.minlenght('#password',6),
+        validator.minlength('#password',6),
+        validator.comfirmed('#password_confirmation',function(){
+            return document.querySelector('#form-1 #password').value;
+        },'mật khẩu nhập lại không chính xác')
     ]
 })
