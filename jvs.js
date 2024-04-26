@@ -1,5 +1,17 @@
 
 validator = function(i){
+    
+    function validate (inputelemant,rule){
+        var errormessage = rule.test(inputelemant.value)
+        var warningmessage = inputelemant.parentElement.querySelector('.form-message')
+        if(errormessage){
+            warningmessage.innerText = errormessage;
+            inputelemant.parentElement.classList.add('invalid');
+        }else{
+            warningmessage.innerText = '';
+            inputelemant.parentElement.classList.remove('invalid');
+        }
+    }
     var formelements = document.querySelector(i.form);
     var selectorrules = {};
     if (formelements){
@@ -10,21 +22,17 @@ validator = function(i){
             }else{
                 selectorrules[rule.a] = [rule.test];
             }
-
             var inputelemant = formelements.querySelector(rule.a)
                 if(inputelemant){
                     inputelemant.onblur = function(){
-                        var errormessage = rule.test(inputelemant.value)
-                        var warningmessage = inputelemant.parentElement.querySelector('.form-message')
-                        if(errormessage){
-                            warningmessage.innerText = errormessage;
-                            inputelemant.parentElement.classList.add('invalid');
-                        }else{
-                            warningmessage.innerText = '';
-                            inputelemant.parentElement.classList.remove('invalid');
-                        }
+                        validate(inputelemant,rule);
                     }
                 }  
+                inputelemant.oninput = function(){
+                    var warningmessage = inputelemant.parentElement.querySelector('.form-message')
+                    warningmessage.innerText = '';
+                    inputelemant.parentElement.classList.remove('invalid');
+                }
         })
         console.log(selectorrules);
     }
@@ -44,8 +52,9 @@ validator.isemail = function(a){
 
     return{
         a :a,
-        test:function() {
-    
+        test:function(value) {
+            var regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+             return regex.test(value) ? undefined : "vui lòng nhập đúng dạng email"
         }
     };
 }
@@ -54,7 +63,7 @@ validator.minlenght = function(a,min){
     return{
         a:a,
         test : function(value){
-         value.length >= min ? undefined : "nhập nhiều hơn 6 ký tự"
+         value.length >= min ? undefined : 'nhập nhiều hơn {$min} ký tự'
         }
     };
 }
@@ -62,8 +71,11 @@ validator({
     form:'#form-1',
     rules : [
         validator.required('#fullname','vui lòng nhập thông tin'),
+        validator.required('#email','vui lòng nhập thông tin'),
+        validator.required('$password','vui lòng nhập thông tin'),
+        // validator.required('#password'),
         validator.isemail('#email'),
-        validator.minlenght('#password',6),
-        validator.minlenght('#fullname',6),
+        // validator.minlenght('#password',6),
+        // validator.minlenght('#password',6),
     ]
 })
